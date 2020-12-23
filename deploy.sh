@@ -1,10 +1,11 @@
 ##############################################################
 # Script to provision Ubuntu development machine with:
 # - Visual Studio Code
-# - Docker (rootless)
+# - Docker
 # - Discord
 # - Postman
-# -
+# - MySQL Workbench
+# - Android Studio
 #
 # This script should be run as root and the username should be
 # supplied as a parameter:
