@@ -1,6 +1,6 @@
-Ubuntu Desktop Development Setup
+Ubuntu Desktop Development Environment Setup
 ===
-Scripts to set up a new Ubuntu Desktop host with development tools, including IDEs. Tested with 20.04 LTS (Focal).  Tools include:
+Scripts to set up a new Ubuntu Desktop host with development tools. Tested with 20.04 LTS (Focal).  Tools include:
 - IDEs: VSCode, Android Studio
 - Virtual environments: Docker, KVM
 - Database studio: MySQL Workbench
@@ -14,10 +14,10 @@ sudo -i
 
 Clone the repository to a local path
 ```shell
-git clone https://github.com/voquis/ubuntu-development-setup.git
+git clone https://github.com/voquis/ubuntu-desktop-dev-setup.git
 ```
 
 Execute the deployment script providing a `username` to update.
 ```shell
-./ubuntu-development-setup/deploy.sh username
+./ubuntu-desktop-dev-setup/deploy.sh username
 ```
