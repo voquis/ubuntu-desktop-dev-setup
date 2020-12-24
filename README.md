@@ -12,6 +12,23 @@ Run the `deploy.sh` script as privileged user, providing the username for which 
 sudo -i
 ```
 
+## Without git
+Download the script locally:
+```shell
+wget -O deploy.sh https://raw.githubusercontent.com/voquis/ubuntu-desktop-dev-setup/main/deploy.sh
+```
+
+Make the script executable with:
+```shell
+chmod +x deploy.sh
+```
+
+Execute the deployment script providing a `username` to update.
+```shell
+./deploy.sh username
+```
+
+## Using git
 Clone the repository to a local path
 ```shell
 git clone https://github.com/voquis/ubuntu-desktop-dev-setup.git
