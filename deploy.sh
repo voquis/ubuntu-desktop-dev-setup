@@ -136,8 +136,8 @@ apt-get install -y \
   cpu-checker
 # Run the kvm-ok tool and check if KVM acceleration can be used
 kvm-ok
-is_kvm_ok=$(kvm-ok | grep 'KVM acceleration can be used')
-if [ "$is_kvm_ok" -eq 0 ]; then
+is_kvm_ok=$(kvm-ok | grep -c 'KVM acceleration can be used')
+if [ "$is_kvm_ok" -eq 1 ]; then
   # Install dependencies
   apt-get install -y \
     qemu \
@@ -155,6 +155,10 @@ fi
 #-------------------------------------------------------------
 # Configure Desktop favourites panel (as user)
 #-------------------------------------------------------------
-su -c "$1"
-dconf write /org/gnome/shell/favorite-apps "['ubiquity.desktop', 'firefox.desktop', 'code.desktop', 'discord.desktop', 'postman.desktop', 'org.gnome.Terminal.desktop', 'mysql-workbench.desktop', 'android-studio.desktop', 'org.gnome.Nautilus.desktop', 'snap-store_ubuntu-software.desktop', 'yelp.desktop']"
-exit
+apps="\"['ubiquity.desktop', 'firefox.desktop', 'code.desktop', 'discord.desktop', 'postman.desktop', 'org.gnome.Terminal.desktop', 'mysql-workbench.desktop', 'android-studio.desktop', 'org.gnome.Nautilus.desktop', 'snap-store_ubuntu-software.desktop', 'yelp.desktop']\""
+sudo -H -u "$1" bash -c "dconf write /org/gnome/shell/favorite-apps ${apps}"
+
+#-------------------------------------------------------------
+# Restart for gnome changes to take affect
+#-------------------------------------------------------------
+reboot now
