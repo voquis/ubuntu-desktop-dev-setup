@@ -1,3 +1,4 @@
+#!/bin/bash
 ##############################################################
 # Script to provision Ubuntu development machine with:
 # - Visual Studio Code
@@ -21,9 +22,10 @@ apt-get upgrade -y
 # Command line tools
 #-------------------------------------------------------------
 apt-get install -y \
-	curl \
-	vim \
-	git
+  curl \
+  vim \
+  git \
+  jq
 
 #-------------------------------------------------------------
 # VSCode
@@ -39,10 +41,10 @@ dpkg -i vscode.deb
 
 # Install discord dependencies
 apt-get install -y \
-	libatomic1 \
-	libgconf-2-4 \
-	libappindicator1 \
-	libc++1	 
+  libatomic1 \
+  libgconf-2-4 \
+  libappindicator1 \
+  libc++1
 
 # Download and install Discord
 wget -O discord.deb 'https://discord.com/api/download?platform=linux&format=deb'
@@ -66,7 +68,7 @@ dpkg -i docker-ce.deb
 systemctl enable docker
 
 # Add user to docker users group (effectively root)
-usermod -aG docker $1
+usermod -aG docker "$1"
 
 #-------------------------------------------------------------
 # Postman
@@ -97,9 +99,9 @@ Keywords=postman;
 
 # Download and install dependencies
 apt-get install -y \
-	libpcrecpp0v5 \
-	libpython2.7 \
-	libzip5
+  libpcrecpp0v5 \
+  libpython2.7 \
+  libzip5
 
 # Download and install package
 wget -O mysql-workbench.deb 'https://dev.mysql.com/get/Downloads/MySQLGUITools/mysql-workbench-community_8.0.22-1ubuntu20.04_amd64.deb'
@@ -131,28 +133,28 @@ Keywords=postman;
 
 # Configure virtual machine acceleration for Android emulator
 apt-get install -y \
-	cpu-checker
+  cpu-checker
 # Run the kvm-ok tool and check if KVM acceleration can be used
 kvm-ok
-kvm-ok | grep 'KVM acceleration can be used'
-if [ $? -eq 0 ]; then
-	# Install dependencies
-	apt-get install -y \
-		qemu \
-		qemu-kvm \
-		libvirt-daemon \
-		libvirt-clients \
-		bridge-utils \
-		virt-manager
+is_kvm_ok=$(kvm-ok | grep 'KVM acceleration can be used')
+if [ "$is_kvm_ok" -eq 0 ]; then
+  # Install dependencies
+  apt-get install -y \
+    qemu \
+    qemu-kvm \
+    libvirt-daemon \
+    libvirt-clients \
+    bridge-utils \
+    virt-manager
 
-	# Enable on next boot	
-	systemctl enable libvirtd
+  # Enable on next boot
+  systemctl enable libvirtd
 fi
 
 
 #-------------------------------------------------------------
 # Configure Desktop favourites panel (as user)
 #-------------------------------------------------------------
-su $1
+su -c "$1"
 dconf write /org/gnome/shell/favorite-apps "['ubiquity.desktop', 'firefox.desktop', 'code.desktop', 'discord.desktop', 'postman.desktop', 'org.gnome.Terminal.desktop', 'mysql-workbench.desktop', 'android-studio.desktop', 'org.gnome.Nautilus.desktop', 'snap-store_ubuntu-software.desktop', 'yelp.desktop']"
 exit
