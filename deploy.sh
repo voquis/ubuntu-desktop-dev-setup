@@ -35,6 +35,11 @@ apt-get install -y \
 wget -O vscode.deb 'https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64'
 dpkg -i vscode.deb
 
+# Fetch default settings
+wget -O settings.json 'https://raw.githubusercontent.com/voquis/ubuntu-desktop-dev-setup/main/vscode/settings.json'
+chown "$1":"$1" settings.json
+mv settings.json "/home/$1"
+
 #-------------------------------------------------------------
 # Discord
 #-------------------------------------------------------------
