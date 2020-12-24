@@ -1,0 +1,14 @@
+{
+    "diffEditor.ignoreTrimWhitespace": false,
+    "editor.renderControlCharacters": true,
+    "editor.renderIndentGuides": true,
+    "editor.renderWhitespace": "all",
+    "editor.tabSize": 2,
+    "files.eol": "\n",
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "git.autofetch": true,
+    "telemetry.enableCrashReporter": false,
+    "telemetry.enableTelemetry": false,
+    "terminal.integrated.scrollback": 10000
+}
