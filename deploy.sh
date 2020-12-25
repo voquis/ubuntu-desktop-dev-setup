@@ -75,6 +75,9 @@ systemctl enable docker
 # Add user to docker users group (effectively root)
 usermod -aG docker "$1"
 
+# Install Docker compose for managing multiple dependent containers
+apt-get install -y docker-compose
+
 #-------------------------------------------------------------
 # Postman
 #-------------------------------------------------------------
