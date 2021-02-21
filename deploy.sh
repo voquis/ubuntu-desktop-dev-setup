@@ -137,7 +137,7 @@ Exec=/usr/share/android-studio/bin/studio.sh
 Icon=/usr/share/android-studio/bin/studio.svg
 Type=Application
 Categories=Utility;Development;IDE;
-Keywords=postman;
+Keywords=android;
 ' > /usr/share/applications/android-studio.desktop
 
 # Configure virtual machine acceleration for Android emulator
@@ -160,11 +160,29 @@ if [ "$is_kvm_ok" -eq 1 ]; then
   systemctl enable libvirtd
 fi
 
+#-------------------------------------------------------------
+# Inkscape
+#-------------------------------------------------------------
+apt-get install -y inkscape
+
+# Write new desktop entry with reference to icon, that will
+# later be used to add to favourites panel
+echo '[Desktop Entry]
+Name=Inkscape
+StartupWMClass=Inkscape
+Comment=Inkscape
+GenericName=Inkscape
+Exec=/usr/bin/inkscape
+Icon=/usr/share/inkscape/icons/inkscape.svg
+Type=Application
+Categories=Utility;Development;
+Keywords=Inkscape;
+' > /usr/share/applications/inkscape.desktop
 
 #-------------------------------------------------------------
 # Configure Desktop favourites panel (as user)
 #-------------------------------------------------------------
-apps="\"['ubiquity.desktop', 'firefox.desktop', 'code.desktop', 'discord.desktop', 'postman.desktop', 'org.gnome.Terminal.desktop', 'mysql-workbench.desktop', 'android-studio.desktop', 'org.gnome.Nautilus.desktop', 'snap-store_ubuntu-software.desktop', 'yelp.desktop']\""
+apps="\"['ubiquity.desktop', 'firefox.desktop', 'code.desktop', 'discord.desktop', 'postman.desktop', 'org.gnome.Terminal.desktop', 'mysql-workbench.desktop', 'android-studio.desktop', 'inkscape.desktop', 'org.gnome.Nautilus.desktop', 'snap-store_ubuntu-software.desktop', 'yelp.desktop']\""
 sudo -H -u "$1" bash -c "dconf write /org/gnome/shell/favorite-apps ${apps}"
 
 #-------------------------------------------------------------
