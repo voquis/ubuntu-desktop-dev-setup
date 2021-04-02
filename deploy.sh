@@ -14,6 +14,8 @@
 # sudo deploy.sh myuser
 ##############################################################
 
+set -euo pipefail
+
 # General update of repositories and packages
 apt-get update
 apt-get upgrade -y
@@ -227,6 +229,33 @@ export PYENV_ROOT="$HOME/.pyenv"
 export PATH=$PATH:/usr/share/pyenv/bin
 eval "$(pyenv init -)"
 . /usr/share/pyenv/completions/pyenv.bash
+
+EOF
+
+#-------------------------------------------------------------
+# Ruby version manager (rbenv) with ruby builder
+# https://github.com/rbenv/rbenv
+#-------------------------------------------------------------
+
+# Install rbenv
+git clone https://github.com/rbenv/rbenv /usr/share/rbenv
+# Add to system wide bashrc for all users
+tee -a /etc/bash.bashrc <<- \EOF
+# Rbenv Ruby version manager
+export RBENV_ROOT="$HOME/.rbenv"
+export PATH=$PATH:/usr/share/rbenv/bin
+eval "$(rbenv init -)"
+. /usr/share/rbenv/completions/rbenv.bash
+
+EOF
+
+# Add Ruby builder plugin for installing ruby versions
+git clone https://github.com/rbenv/ruby-build.git /usr/share/ruby-build
+chmod +x /usr/share/ruby-build/bin/*
+# Add to system wide bashrc for all users
+tee -a /etc/bash.bashrc <<- \EOF
+# Rbenv Ruby version builder
+export PATH=$PATH:/usr/share/ruby-build/bin
 
 EOF
 
