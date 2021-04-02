@@ -261,6 +261,30 @@ export PATH=$PATH:/usr/share/ruby-build/bin
 EOF
 
 #-------------------------------------------------------------
+# Keybase for GPG key verification
+# https://keybase.io
+#-------------------------------------------------------------
+wget -O keybase.deb 'https://prerelease.keybase.io/keybase_amd64.deb'
+dpkg -i keybase.deb
+
+#-------------------------------------------------------------
+# Terraform version manager (tfenv)
+# https://github.com/tfutils/tfenv
+#-------------------------------------------------------------
+git clone https://github.com/tfutils/tfenv.git /usr/share/tfenv
+# Add to system wide bashrc for all users
+# Create symlink to bins because tfenv downloads to bin directory
+tee -a /etc/bash.bashrc <<- \EOF
+# TFenv Terraform version builder
+export TFENV_ROOT="$HOME/.tfenv"
+mkdir -p "$TFENV_ROOT"
+export PATH=$PATH:$TFENV_ROOT/bin
+ln -sf /usr/share/tfenv/* $TFENV_ROOT
+eval "$(tfenv init -)"
+
+EOF
+
+#-------------------------------------------------------------
 # Google Chrome
 #-------------------------------------------------------------
 wget -O chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
