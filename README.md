@@ -1,9 +1,21 @@
 Ubuntu Desktop Development Environment Setup
 ===
-Scripts to set up a new Ubuntu Desktop host with development tools. Tested with 20.04 LTS (Focal).  Tools include:
+Scripts to set up a new Ubuntu Desktop host with development and deployment tools. Tested with 20.04 LTS (Focal).
+
+Development tools include:
 - IDEs: VSCode, Android Studio
 - Virtual environments: Docker, KVM
 - Database studio: MySQL Workbench
+
+Development environments include:
+- Java/Scala/Groovy/other JVM tooling ([sdkman](https://sdkman.io))
+- Python ([pyenv](https://github.com/pyenv/pyenv))
+- NodeJS ([nvm](https://github.com/nvm-sh/nvm))
+- Ruby ([rbenv](https://github.com/rbenv/rbenv))
+
+Deployment tools
+- Terraform ([tfenv](https://github.com/tfutils/tfenv))
+- Packer ([pkenv](https://github.com/iamhsa/pkenv))
 
 # Deployment
 Run the `deploy.sh` script as privileged user, providing the username for which to apply additional customisations, e.g. Desktop favourites:

@@ -301,6 +301,19 @@ ln -sf /usr/share/pkenv/* $PKENV_ROOT
 EOF
 
 #-------------------------------------------------------------
+# SDKman for Java/JVM tooling version management
+# https://sdkman.io
+#-------------------------------------------------------------
+wget -O /usr/share/sdkman "https://get.sdkman.io"
+chmod +x /usr/share/sdkman
+tee -a /etc/bash.bashrc <<- \EOF
+# SDKMan version manager
+/usr/share/sdkman > /dev/null
+chmod +x $HOME/.sdkman/bin/sdkman-init.sh
+$HOME/.sdkman/bin/sdkman-init.sh
+EOF
+
+#-------------------------------------------------------------
 # Google Chrome
 #-------------------------------------------------------------
 wget -O chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
