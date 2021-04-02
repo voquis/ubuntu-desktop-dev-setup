@@ -180,6 +180,18 @@ Keywords=Inkscape;
 ' > /usr/share/applications/inkscape.desktop
 
 #-------------------------------------------------------------
+# NodeJS Version Manager (nvm)
+# https://github.com/nvm-sh/nvm
+#-------------------------------------------------------------
+git clone --branch v0.38.0 https://github.com/nvm-sh/nvm.git /usr/share/nvm
+# Add to system wide bashrc for all users
+tee -a /etc/bash.bashrc <<- \EOF
+# Node Version Manager
+export NVM_DIR="$HOME/.nvm"
+. /usr/share/nvm/nvm.sh
+EOF
+
+#-------------------------------------------------------------
 # Google Chrome
 #-------------------------------------------------------------
 wget -O chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
