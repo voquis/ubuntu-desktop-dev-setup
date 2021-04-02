@@ -275,12 +275,28 @@ git clone https://github.com/tfutils/tfenv.git /usr/share/tfenv
 # Add to system wide bashrc for all users
 # Create symlink to bins because tfenv downloads to bin directory
 tee -a /etc/bash.bashrc <<- \EOF
-# TFenv Terraform version builder
+# TFenv Terraform version manager
 export TFENV_ROOT="$HOME/.tfenv"
 mkdir -p "$TFENV_ROOT"
 export PATH=$PATH:$TFENV_ROOT/bin
 ln -sf /usr/share/tfenv/* $TFENV_ROOT
 eval "$(tfenv init -)"
+
+EOF
+
+#-------------------------------------------------------------
+# Packer version manager (pkenv)
+# https://github.com/iamhsa/pkenv
+#-------------------------------------------------------------
+git clone https://github.com/iamhsa/pkenv.git /usr/share/pkenv
+# Add to system wide bashrc for all users
+# Create symlink to bins because pkenv downloads to bin directory
+tee -a /etc/bash.bashrc <<- \EOF
+# PKenv Packer version manager
+export PKENV_ROOT="$HOME/.pkenv"
+mkdir -p "$PKENV_ROOT"
+export PATH=$PATH:$PKENV_ROOT/bin
+ln -sf /usr/share/pkenv/* $PKENV_ROOT
 
 EOF
 
