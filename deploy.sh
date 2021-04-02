@@ -189,6 +189,45 @@ tee -a /etc/bash.bashrc <<- \EOF
 # Node Version Manager
 export NVM_DIR="$HOME/.nvm"
 . /usr/share/nvm/nvm.sh
+
+EOF
+
+#-------------------------------------------------------------
+# Python version manager (pyenv)
+# https://github.com/pyenv/pyenv
+#-------------------------------------------------------------
+
+# Install python build dependencies
+apt-get install -y \
+        build-essential \
+        libssl-dev \
+        zlib1g-dev \
+        libbz2-dev \
+        libreadline-dev \
+        libsqlite3-dev \
+        llvm \
+        libncurses5-dev \
+        xz-utils \
+        tk-dev \
+        libxml2-dev \
+        libxmlsec1-dev \
+        libffi-dev \
+        liblzma-dev
+
+# Install pyenv
+git clone https://github.com/pyenv/pyenv /usr/share/pyenv
+cd /usr/share/pyenv || { echo "Error changing directory"; exit 1; }
+src/configure
+make -C src
+cd - || { echo "Error returning to previous directory"; exit 1; }
+# Add to system wide bashrc for all users
+tee -a /etc/bash.bashrc <<- \EOF
+# Pyenv Python version manager
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH=$PATH:/usr/share/pyenv/bin
+eval "$(pyenv init -)"
+. /usr/share/pyenv/completions/pyenv.bash
+
 EOF
 
 #-------------------------------------------------------------
