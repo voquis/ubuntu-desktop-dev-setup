@@ -192,9 +192,40 @@ export NVM_DIR="$HOME/.nvm"
 EOF
 
 #-------------------------------------------------------------
+# Google Chrome
+#-------------------------------------------------------------
+wget -O chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+dpkg -i chrome.deb
+
+# Write new desktop entry with reference to icon, that will
+# later be used to add to favourites panel
+echo '[Desktop Entry]
+Version=1.0
+Name=Google Chrome
+GenericName=Web Browser
+Comment=Access the Internet
+Exec=/usr/bin/google-chrome-stable %U
+StartupNotify=true
+Terminal=false
+Icon=google-chrome
+Type=Application
+Categories=Network;WebBrowser;
+MimeType=application/pdf;application/rdf+xml;application/rss+xml;application/xhtml+xml;application/xhtml_xml;application/xml;image/gif;image/jpeg;image/png;image/webp;text/html;text/xml;x-scheme-handler/ftp;x-scheme-handler/http;x-scheme-handler/https;
+Actions=new-window;new-private-window;
+
+[Desktop Action new-window]
+Name=New Window
+Exec=/usr/bin/google-chrome-stable
+
+[Desktop Action new-private-window]
+Name=New Incognito Window
+Exec=/usr/bin/google-chrome-stable --incognito
+' > /usr/share/applications/google-chrome.desktop
+
+#-------------------------------------------------------------
 # Configure Desktop favourites panel (as user)
 #-------------------------------------------------------------
-apps="\"['ubiquity.desktop', 'firefox.desktop', 'code.desktop', 'discord.desktop', 'postman.desktop', 'org.gnome.Terminal.desktop', 'mysql-workbench.desktop', 'android-studio.desktop', 'inkscape.desktop', 'org.gnome.Nautilus.desktop', 'snap-store_ubuntu-software.desktop', 'yelp.desktop']\""
+apps="\"['ubiquity.desktop', 'firefox.desktop', 'google-chrome.desktop', 'code.desktop', 'discord.desktop', 'postman.desktop', 'org.gnome.Terminal.desktop', 'mysql-workbench.desktop', 'android-studio.desktop', 'inkscape.desktop', 'org.gnome.Nautilus.desktop', 'snap-store_ubuntu-software.desktop', 'yelp.desktop']\""
 sudo -H -u "$1" bash -c "dconf write /org/gnome/shell/favorite-apps ${apps}"
 
 #-------------------------------------------------------------
