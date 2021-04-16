@@ -311,6 +311,18 @@ tee -a /etc/bash.bashrc <<- \EOF
 /usr/share/sdkman > /dev/null
 chmod +x $HOME/.sdkman/bin/sdkman-init.sh
 $HOME/.sdkman/bin/sdkman-init.sh
+
+EOF
+
+#-------------------------------------------------------------
+# Oh My Bash
+# https://github.com/ohmyzsh/ohmyzsh/
+#-------------------------------------------------------------
+git clone git://github.com/ohmybash/oh-my-bash.git /usr/share/oh-my-bash
+tee -a /etc/bash.bashrc <<- \EOF
+# Oh My Bash
+/usr/share/oh-my-bash/tools/install.sh > /dev/null
+
 EOF
 
 #-------------------------------------------------------------
