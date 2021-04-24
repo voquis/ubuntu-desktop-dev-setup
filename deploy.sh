@@ -27,7 +27,8 @@ apt-get install -y \
   curl \
   vim \
   git \
-  jq
+  jq \
+  zsh
 
 #-------------------------------------------------------------
 # VSCode
@@ -183,6 +184,55 @@ Keywords=Inkscape;
 ' > /usr/share/applications/inkscape.desktop
 
 #-------------------------------------------------------------
+# Keybase for GPG key verification
+# https://keybase.io
+#-------------------------------------------------------------
+wget -O keybase.deb 'https://prerelease.keybase.io/keybase_amd64.deb'
+dpkg -i keybase.deb
+
+#-------------------------------------------------------------
+# Google Chrome
+#-------------------------------------------------------------
+wget -O chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+dpkg -i chrome.deb
+
+# Write new desktop entry with reference to icon, that will
+# later be used to add to favourites panel
+echo '[Desktop Entry]
+Version=1.0
+Name=Google Chrome
+GenericName=Web Browser
+Comment=Access the Internet
+Exec=/usr/bin/google-chrome-stable %U
+StartupNotify=true
+Terminal=false
+Icon=google-chrome
+Type=Application
+Categories=Network;WebBrowser;
+MimeType=application/pdf;application/rdf+xml;application/rss+xml;application/xhtml+xml;application/xhtml_xml;application/xml;image/gif;image/jpeg;image/png;image/webp;text/html;text/xml;x-scheme-handler/ftp;x-scheme-handler/http;x-scheme-handler/https;
+Actions=new-window;new-private-window;
+
+[Desktop Action new-window]
+Name=New Window
+Exec=/usr/bin/google-chrome-stable
+
+[Desktop Action new-private-window]
+Name=New Incognito Window
+Exec=/usr/bin/google-chrome-stable --incognito
+' > /usr/share/applications/google-chrome.desktop
+
+#-------------------------------------------------------------
+# Oh My Bash
+# https://github.com/ohmybash/oh-my-bash
+#-------------------------------------------------------------
+git clone git://github.com/ohmybash/oh-my-bash.git /usr/share/oh-my-bash
+tee -a /etc/bash.bashrc <<- \EOF
+# Oh My Bash
+/usr/share/oh-my-bash/tools/install.sh > /dev/null
+
+EOF
+
+#-------------------------------------------------------------
 # NodeJS Version Manager (nvm)
 # https://github.com/nvm-sh/nvm
 #-------------------------------------------------------------
@@ -261,11 +311,40 @@ export PATH=$PATH:/usr/share/ruby-build/bin
 EOF
 
 #-------------------------------------------------------------
-# Keybase for GPG key verification
-# https://keybase.io
+# PHP version manager (phpenv) with version builder
+# https://github.com/phpenv/phpenv
 #-------------------------------------------------------------
-wget -O keybase.deb 'https://prerelease.keybase.io/keybase_amd64.deb'
-dpkg -i keybase.deb
+
+# Install dependencies for php extensions
+apt-get install -y \
+  autoconf \
+  libcurl4-openssl-dev \
+  libjpeg-dev \
+  libonig-dev \
+  libtidy-dev \
+  libzip-dev
+
+# Install phpenv
+git clone https://github.com/phpenv/phpenv /usr/share/phpenv
+# Add to system wide bashrc for all users
+tee -a /etc/bash.bashrc <<- \EOF
+# phpenv PHP version manager
+export PHPENV_ROOT="$HOME/.phpenv"
+export PATH=$PATH:/usr/share/phpenv/bin
+eval "$(phpenv init -)"
+. /usr/share/phpenv/completions/phpenv.bash
+
+EOF
+
+# Add PHP builder plugin for installing PHP versions
+git clone https://github.com/php-build/php-build.git /usr/share/php-build
+chmod +x /usr/share/php-build/bin/*
+# Add to system wide bashrc for all users
+tee -a /etc/bash.bashrc <<- \EOF
+# PHP version builder
+export PATH=$PATH:/usr/share/php-build/bin
+
+EOF
 
 #-------------------------------------------------------------
 # Terraform version manager (tfenv)
@@ -314,47 +393,6 @@ $HOME/.sdkman/bin/sdkman-init.sh
 
 EOF
 
-#-------------------------------------------------------------
-# Oh My Bash
-# https://github.com/ohmyzsh/ohmyzsh/
-#-------------------------------------------------------------
-git clone git://github.com/ohmybash/oh-my-bash.git /usr/share/oh-my-bash
-tee -a /etc/bash.bashrc <<- \EOF
-# Oh My Bash
-/usr/share/oh-my-bash/tools/install.sh > /dev/null
-
-EOF
-
-#-------------------------------------------------------------
-# Google Chrome
-#-------------------------------------------------------------
-wget -O chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-dpkg -i chrome.deb
-
-# Write new desktop entry with reference to icon, that will
-# later be used to add to favourites panel
-echo '[Desktop Entry]
-Version=1.0
-Name=Google Chrome
-GenericName=Web Browser
-Comment=Access the Internet
-Exec=/usr/bin/google-chrome-stable %U
-StartupNotify=true
-Terminal=false
-Icon=google-chrome
-Type=Application
-Categories=Network;WebBrowser;
-MimeType=application/pdf;application/rdf+xml;application/rss+xml;application/xhtml+xml;application/xhtml_xml;application/xml;image/gif;image/jpeg;image/png;image/webp;text/html;text/xml;x-scheme-handler/ftp;x-scheme-handler/http;x-scheme-handler/https;
-Actions=new-window;new-private-window;
-
-[Desktop Action new-window]
-Name=New Window
-Exec=/usr/bin/google-chrome-stable
-
-[Desktop Action new-private-window]
-Name=New Incognito Window
-Exec=/usr/bin/google-chrome-stable --incognito
-' > /usr/share/applications/google-chrome.desktop
 
 #-------------------------------------------------------------
 # Configure Desktop favourites panel (as user)
