@@ -311,6 +311,42 @@ export PATH=$PATH:/usr/share/ruby-build/bin
 EOF
 
 #-------------------------------------------------------------
+# PHP version manager (phpenv) with version builder
+# https://github.com/phpenv/phpenv
+#-------------------------------------------------------------
+
+# Install dependencies for php extensions
+apt-get install -y \
+  autoconf \
+  libcurl4-openssl-dev \
+  libjpeg-dev \
+  libonig-dev \
+  libtidy-dev \
+  libzip-dev
+
+# Install phpenv
+git clone https://github.com/phpenv/phpenv /usr/share/phpenv
+# Add to system wide bashrc for all users
+tee -a /etc/bash.bashrc <<- \EOF
+# phpenv PHP version manager
+export PHPENV_ROOT="$HOME/.phpenv"
+export PATH=$PATH:/usr/share/phpenv/bin
+eval "$(phpenv init -)"
+. /usr/share/phpenv/completions/phpenv.bash
+
+EOF
+
+# Add PHP builder plugin for installing PHP versions
+git clone https://github.com/php-build/php-build.git /usr/share/php-build
+chmod +x /usr/share/php-build/bin/*
+# Add to system wide bashrc for all users
+tee -a /etc/bash.bashrc <<- \EOF
+# PHP version builder
+export PATH=$PATH:/usr/share/php-build/bin
+
+EOF
+
+#-------------------------------------------------------------
 # Terraform version manager (tfenv)
 # https://github.com/tfutils/tfenv
 #-------------------------------------------------------------
