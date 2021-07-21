@@ -222,6 +222,49 @@ Exec=/usr/bin/google-chrome-stable --incognito
 ' > /usr/share/applications/google-chrome.desktop
 
 #-------------------------------------------------------------
+# Brave browser
+# https://brave.com/linux/
+#-------------------------------------------------------------
+apt-get install -y \
+    apt-transport-https
+
+curl -fsSLo \
+    /usr/share/keyrings/brave-browser-archive-keyring.gpg \
+    https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
+
+echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg arch=amd64] https://brave-browser-apt-release.s3.brave.com/ stable main"| tee /etc/apt/sources.list.d/brave-browser-release.list
+
+apt-get update
+
+apt-get install -y \
+    brave-browser
+
+# Write new desktop entry with reference to icon, that will
+# later be used to add to favourites panel
+echo '[Desktop Entry]
+Version=1.0
+Name=Brave Web Browser
+GenericName=Web Browser
+Comment=Access the Internet
+Exec=/usr/bin/brave-browser-stable %U
+StartupNotify=true
+Terminal=false
+Icon=brave-browser
+Type=Application
+Categories=Network;WebBrowser;
+MimeType=application/pdf;application/rdf+xml;application/rss+xml;application/xhtml+xml;application/xhtml_xml;application/xml;image/gif;image/jpeg;image/png;image/webp;text/html;text/xml;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ipfs;x-scheme-handler/ipns;
+Actions=new-window;new-private-window;
+
+[Desktop Action new-window]
+Name=New Window
+Exec=/usr/bin/brave-browser-stable
+
+[Desktop Action new-private-window]
+Name=New Incognito Window
+Exec=/usr/bin/brave-browser-stable --incognito
+' > /usr/share/applications/brave-browser.desktop
+
+#-------------------------------------------------------------
 # Oh My Bash
 # https://github.com/ohmybash/oh-my-bash
 #-------------------------------------------------------------
@@ -397,7 +440,7 @@ EOF
 #-------------------------------------------------------------
 # Configure Desktop favourites panel (as user)
 #-------------------------------------------------------------
-apps="\"['ubiquity.desktop', 'firefox.desktop', 'google-chrome.desktop', 'code.desktop', 'discord.desktop', 'postman.desktop', 'org.gnome.Terminal.desktop', 'mysql-workbench.desktop', 'android-studio.desktop', 'inkscape.desktop', 'org.gnome.Nautilus.desktop', 'snap-store_ubuntu-software.desktop', 'yelp.desktop']\""
+apps="\"['ubiquity.desktop', 'firefox.desktop', 'google-chrome.desktop', 'brave-browser.desktop', 'code.desktop', 'discord.desktop', 'postman.desktop', 'org.gnome.Terminal.desktop', 'mysql-workbench.desktop', 'android-studio.desktop', 'inkscape.desktop', 'org.gnome.Nautilus.desktop', 'snap-store_ubuntu-software.desktop', 'yelp.desktop']\""
 sudo -H -u "$1" bash -c "dconf write /org/gnome/shell/favorite-apps ${apps}"
 
 #-------------------------------------------------------------
