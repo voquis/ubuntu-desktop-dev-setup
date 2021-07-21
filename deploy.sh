@@ -40,9 +40,8 @@ dpkg -i vscode.deb
 
 # Fetch default settings
 wget -O settings.json 'https://raw.githubusercontent.com/voquis/ubuntu-desktop-dev-setup/main/vscode/settings.json'
-chown "$1":"$1" settings.json
-mkdir -p "/home/$1/.config/Code/User"
 mv settings.json "/home/$1/.config/Code/User"
+chown -R "$1":"$1" "/home/$1/.config/Code"
 
 #-------------------------------------------------------------
 # Discord
