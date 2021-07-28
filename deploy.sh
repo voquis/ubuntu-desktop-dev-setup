@@ -165,6 +165,23 @@ if [ "$is_kvm_ok" -eq 1 ]; then
 fi
 
 #-------------------------------------------------------------
+# AWS CLI
+#-------------------------------------------------------------
+
+# Download archive from URL
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+# Unzip the installer
+unzip awscliv2.zip
+# Run the install program
+./aws/install
+# Remove the archive
+rm -rf awscliv2.zip
+# Create aws directory
+mkdir /home/"$1"/.aws
+# Create config file
+touch /home/"$1"/.aws/config
+
+#-------------------------------------------------------------
 # Inkscape
 #-------------------------------------------------------------
 apt-get install -y inkscape
