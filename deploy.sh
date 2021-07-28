@@ -173,7 +173,7 @@ curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip
 # Unzip the installer
 unzip awscliv2.zip
 # Run the install program
-sudo ./aws/install
+./aws/install
 # Remove the archive
 rm -rf awscliv2.zip
 
