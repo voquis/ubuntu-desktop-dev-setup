@@ -176,9 +176,10 @@ unzip awscliv2.zip
 ./aws/install
 # Remove the archive
 rm -rf awscliv2.zip
-
 # Create aws directory
-mkdir ~/.aws
+mkdir /home/$1/.aws
+# Create config file
+touch /home/$1/.aws/config
 
 #-------------------------------------------------------------
 # Inkscape
