@@ -177,6 +177,9 @@ unzip awscliv2.zip
 # Remove the archive
 rm -rf awscliv2.zip
 
+# Create aws directory
+mkdir ~/.aws
+
 #-------------------------------------------------------------
 # Inkscape
 #-------------------------------------------------------------
