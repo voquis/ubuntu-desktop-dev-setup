@@ -182,6 +182,27 @@ mkdir /home/"$1"/.aws
 touch /home/"$1"/.aws/config
 
 #-------------------------------------------------------------
+# Google Cloud SDK that includes gcloud CLI and kubectl
+# https://cloud.google.com/sdk/docs/install#deb
+#-------------------------------------------------------------
+
+# Install dependencies
+apt-get install \
+  ca-certificates \
+  gnupg
+
+# Add package source
+echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+# Import public key
+curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+
+# Update and install cloud SDK
+apt-get update
+apt-get install -y \
+  google-cloud-sdk \
+  kubectl
+
+#-------------------------------------------------------------
 # Inkscape
 #-------------------------------------------------------------
 apt-get install -y inkscape
