@@ -474,6 +474,20 @@ $HOME/.sdkman/bin/sdkman-init.sh
 
 EOF
 
+#-------------------------------------------------------------
+# ClamAV antivirus engine and UI
+# https://www.clamav.net/
+#-------------------------------------------------------------
+apt-get install -y \
+  clamav \
+  clamtk
+
+#-------------------------------------------------------------
+# Uncomplicated firewall (UFW) and the associated GUI
+#-------------------------------------------------------------
+ufw enable
+apt-get install -y
+  gufw
 
 #-------------------------------------------------------------
 # Configure Desktop favourites panel (as user)
