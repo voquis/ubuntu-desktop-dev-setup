@@ -203,6 +203,16 @@ apt-get install -y \
   kubectl
 
 #-------------------------------------------------------------
+# AWS Vault for managing multiple profiles
+# https://github.com/99designs/aws-vault
+#-------------------------------------------------------------
+apt-get install -y \
+  pass
+
+wget -O /usr/local/bin/aws-vault https://github.com/99designs/aws-vault/releases/download/v6.4.0/aws-vault-linux-amd64
+chmod +x /usr/local/bin/aws-vault
+
+#-------------------------------------------------------------
 # Inkscape
 #-------------------------------------------------------------
 apt-get install -y inkscape
@@ -486,7 +496,7 @@ apt-get install -y \
 # Uncomplicated firewall (UFW) and the associated GUI
 #-------------------------------------------------------------
 ufw enable
-apt-get install -y
+apt-get install -y \
   gufw
 
 #-------------------------------------------------------------
