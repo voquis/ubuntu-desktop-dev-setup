@@ -35,14 +35,27 @@ apt-get install -y \
 #-------------------------------------------------------------
 
 # Download and install vscode
-wget -O vscode.deb 'https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64'
-dpkg -i vscode.deb
+wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+install -o root -g root -m 644 packages.microsoft.gpg /etc/apt/trusted.gpg.d/
+sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/trusted.gpg.d/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
+rm -f packages.microsoft.gpg
+apt-get update -y
+apt-get install -y code
 
 # Fetch default settings
 wget -O settings.json 'https://raw.githubusercontent.com/voquis/ubuntu-desktop-dev-setup/main/vscode/settings.json'
 mkdir -p "/home/$1/.config/Code/User"
 mv settings.json "/home/$1/.config/Code/User"
 chown -R "$1":"$1" "/home/$1/.config/Code"
+
+#-------------------------------------------------------------
+# GitHub CLI (gh)
+#-------------------------------------------------------------
+
+curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/etc/apt/trusted.gpg.d/githubcli-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/trusted.gpg.d/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+apt-get update -y
+apt-get install gh
 
 #-------------------------------------------------------------
 # Discord
