@@ -73,6 +73,21 @@ wget -O discord.deb 'https://discord.com/api/download?platform=linux&format=deb'
 dpkg -i discord.deb
 
 #-------------------------------------------------------------
+# Signal
+#-------------------------------------------------------------
+
+# Install signing key
+wget -O- https://updates.signal.org/desktop/apt/keys.asc | gpg --dearmor > signal-desktop-keyring.gpg
+cat signal-desktop-keyring.gpg | tee -a /usr/share/keyrings/signal-desktop-keyring.gpg > /dev/null
+
+# Add repository
+echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/signal-desktop-keyring.gpg] https://updates.signal.org/desktop/apt xenial main' | tee -a /etc/apt/sources.list.d/signal-xenial.list
+
+# Install from newly added repository
+apt update
+apt install -y signal-desktop
+
+#-------------------------------------------------------------
 # Docker
 #-------------------------------------------------------------
 
