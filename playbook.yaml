@@ -1,0 +1,176 @@
+---
+# TODO: Add current user to Docker users group
+# TODO: Fetch VSCode recommended configs
+# TODO: Install the following
+# - AWS CLI
+# - AWS Vault
+# - MySQL Workbench
+# - Android Studio
+# TODO: Add gnome favourites
+# -
+# TODO: Fix apt key warning:
+# https://stackoverflow.com/questions/68992799/warning-apt-key-is-deprecated-manage-keyring-files-in-trusted-gpg-d-instead
+  - name: "Deploy Ubuntu development machine"
+    hosts: localhost
+    connection: local
+    tasks:
+    # apt update and upgrade
+    - name: Update system
+      become: true
+      apt:
+        upgrade: 'yes'
+        update_cache: yes
+    # Install applications and pre-requisite for other applications
+    - name: Install apt dependencies
+      become: true
+      apt:
+        name: "{{item}}"
+        state: present
+      loop:
+        - apt-transport-https
+        - bridge-utils
+        - ca-certificates
+        - clamav
+        - clamtk
+        - cpu-checker
+        - curl
+        - git
+        - gimp
+        - gnupg
+        - gufw
+        - inkscape
+        - jq
+        - libvirt-daemon
+        - libvirt-clients
+        - pass
+        - qemu
+        - qemu-kvm
+        - vim
+        - virt-manager
+        - zsh
+    # Create directories
+    - name: Manage directories
+      become: true
+      file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - /usr/share/keyrings
+        - /tmp/keyrings
+    # Fetch gpg keys for trusted apt repositories
+    - name: Download apt repository gpg keys
+      become: true
+      get_url:
+        url: "{{ item.url }}"
+        dest: "{{ item.file }}"
+      loop:
+        # The following keys do not need gpg dearmor
+        - { file: '/usr/share/keyrings/github-cli.gpg', url: 'https://cli.github.com/packages/githubcli-archive-keyring.gpg' }
+        - { file: '/usr/share/keyrings/brave-browser.gpg', url: 'https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg' }
+        - { file: '/usr/share/keyrings/google.gpg', url: 'https://packages.cloud.google.com/apt/doc/apt-key.gpg' }
+    # Extract keys for plain text pubic keys with dearmor
+    - name: Extract gpg keys with dearmor
+      become: true
+      shell: "wget -O- {{ item.url }} | gpg --dearmor > /usr/share/keyrings/{{ item.file }}"
+      loop:
+        - { file: 'packages.microsoft.gpg', url: 'https://packages.microsoft.com/keys/microsoft.asc' }
+        - { file: 'docker-linux-ubuntu.gpg', url: 'https://download.docker.com/linux/ubuntu/gpg' }
+        - { file: 'signal-desktop.gpg', url: 'https://updates.signal.org/desktop/apt/keys.asc' }
+        - { file: 'pgadmin.gpg', url: 'https://www.pgadmin.org/static/packages_pgadmin_org.pub' }
+    - name: Add apt repositories
+      become: true
+      apt_repository:
+        repo: "{{ item }}"
+      loop:
+        - "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-linux-ubuntu.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        - "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/azure-cli/ {{ ansible_distribution_release }} main"
+        - "deb [arch=amd64 signed-by=/usr/share/keyrings/github-cli.gpg] https://cli.github.com/packages stable main"
+        - "deb [arch=amd64 signed-by=/usr/share/keyrings/brave-browser.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main"
+        - "deb [arch=amd64 signed-by=/usr/share/keyrings/google.gpg] https://packages.cloud.google.com/apt cloud-sdk main"
+        - "deb [arch=amd64 signed-by=/usr/share/keyrings/signal-desktop.gpg] https://updates.signal.org/desktop/apt xenial main"
+        - "deb [arch=amd64 signed-by=/usr/share/keyrings/pgadmin.gpg] https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/{{ ansible_distribution_release }} pgadmin4 main"
+    - name: Install remote packages
+      become: true
+      apt:
+        deb: "{{ item }}"
+      loop:
+        # Google Chrome
+        - https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+        # Microsoft VSCode
+        - https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64
+        # # Keybase
+        # - https://prerelease.keybase.io/keybase_amd64.deb
+    # Update apt after installing repositories
+    - name: Update system
+      become: true
+      apt:
+        upgrade: 'yes'
+        update_cache: yes
+    # Install applications
+    - name: Install applications
+      become: true
+      apt:
+        name: "{{ item }}"
+        state: latest
+      loop:
+        # GitHub CLI
+        - gh
+        # Docker
+        - docker-ce
+        - docker-ce-cli
+        - docker-compose-plugin
+        - containerd.io
+        # Brave browser
+        - brave-browser
+        # Google
+        - google-cloud-sdk
+        - kubectl
+        # Signal messaging
+        - signal-desktop
+        # Microsoft
+        - azure-cli
+        - code
+        # Postgres
+        - pgadmin4-desktop
+    # Start and enable system services on boot
+    - name: Enable services
+      become: true
+      systemd:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop:
+        - docker
+        - libvirtd
+    # Install Snap apps
+    - name: Install Snap apps
+      become: true
+      snap:
+        name:
+          - slack
+          - postman
+          - discord
+          - teams
+    # Set up user groups
+    - name: Manage groups
+      become: true
+      group:
+        name: docker
+        state: present
+    # Set up users in groups
+    # - name: Ensure current user belongs to groups
+    #   become: true
+    #   user:
+    #     name: "{{ ansible_user }}"
+    #     group: docker
+    # Configure uncomplicated firewall (UFW)
+    - name: Enable UFW
+      become: true
+      ufw:
+        state: enabled
+    # apt clean and autoremove
+    - name: Update system
+      become: true
+      apt:
+        autoclean: yes
+        autoremove: yes
