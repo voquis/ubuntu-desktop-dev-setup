@@ -10,7 +10,7 @@ sudo apt upgrade -y
 sudo apt install -y ansible
 
 # Save ansible playbook from this repo to local path
-wget -O playbook.yaml https://raw.githubusercontent.com/voquis/ubuntu-desktop-dev-setup/19-ansible/playbook.yaml
+wget -O playbook.yaml https://raw.githubusercontent.com/voquis/ubuntu-desktop-dev-setup/main/playbook.yaml
 
 # Run ansible playbook
 ansible-playbook playbook.yaml --ask-become-pass

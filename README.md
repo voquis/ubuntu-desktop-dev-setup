@@ -9,7 +9,7 @@ Run the `deploy.sh` script:
 ## Without git
 ```shell
 # Download the script locally:
-wget -O deploy.sh https://raw.githubusercontent.com/voquis/ubuntu-desktop-dev-setup/deploy.sh
+wget -O deploy.sh https://raw.githubusercontent.com/voquis/ubuntu-desktop-dev-setup/main/deploy.sh
 # Make the script executable with:
 chmod +x deploy.sh
 # Execute the deployment script:
