@@ -1,43 +1,19 @@
 Ubuntu Desktop Development Environment Setup
 ===
-Scripts to set up a new Ubuntu Desktop host with development and deployment tools. Tested with 20.04 LTS (Focal).
-
-Development tools include:
-- IDEs: VSCode, Android Studio
-- Virtual environments: Docker, KVM
-- Database studio: MySQL Workbench
-
-Development environments include:
-- Java/Scala/Groovy/other JVM tooling ([sdkman](https://sdkman.io))
-- Python ([pyenv](https://github.com/pyenv/pyenv))
-- NodeJS ([nvm](https://github.com/nvm-sh/nvm))
-- Ruby ([rbenv](https://github.com/rbenv/rbenv))
-
-Deployment tools
-- Terraform ([tfenv](https://github.com/tfutils/tfenv))
-- Packer ([pkenv](https://github.com/iamhsa/pkenv))
+Scripts to set up a new Ubuntu Desktop host with development and deployment tools. Tested with the following LTS Ubuntu distributions:
+- 22.04 (Jammy)
 
 # Deployment
-Run the `deploy.sh` script as privileged user, providing the username for which to apply additional customisations, e.g. Desktop favourites:
-
-```shell
-sudo -i
-```
+Run the `deploy.sh` script:
 
 ## Without git
-Download the script locally:
 ```shell
-wget -O deploy.sh https://raw.githubusercontent.com/voquis/ubuntu-desktop-dev-setup/main/deploy.sh
-```
-
-Make the script executable with:
-```shell
+# Download the script locally:
+wget -O deploy.sh https://raw.githubusercontent.com/voquis/ubuntu-desktop-dev-setup/deploy.sh
+# Make the script executable with:
 chmod +x deploy.sh
-```
-
-Execute the deployment script providing a `username` to update.
-```shell
-./deploy.sh username
+# Execute the deployment script:
+./deploy.sh
 ```
 
 ## Using git
@@ -46,9 +22,8 @@ Clone the repository to a local path
 git clone https://github.com/voquis/ubuntu-desktop-dev-setup.git
 ```
 
-Execute the deployment script providing a `username` to update.
 ```shell
-./ubuntu-desktop-dev-setup/deploy.sh username
+./ubuntu-desktop-dev-setup/deploy.sh
 ```
 
 # Testing
