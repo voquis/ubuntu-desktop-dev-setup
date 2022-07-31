@@ -13,6 +13,7 @@ sudo apt install -y ansible
 wget -O playbook.yaml https://raw.githubusercontent.com/voquis/ubuntu-desktop-dev-setup/main/playbook.yaml
 
 # Run ansible playbook
+export ANSIBLE_LOCALHOST_WARNING=false
 ansible-playbook playbook.yaml --ask-become-pass
 
 # Remove playbook once completed
