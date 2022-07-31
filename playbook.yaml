@@ -8,8 +8,6 @@
       become: true
       ansible.builtin.shell: "getent passwd $(ls /home) | awk -F: '{print $1}'"
       register: all_human_users
-    - ansible.builtin.debug:
-        var: all_human_users
     # apt update and upgrade
     - name: Update system
       become: true
@@ -221,6 +219,7 @@
       ansible.builtin.shell: "curl https://api.github.com/repos/99designs/aws-vault/tags | jq -r '.[0].name'"
       register: aws_vault_latest_tag
     - name: Download latest AWS vault
+      become: true
       ansible.builtin.get_url:
         url: "https://github.com/99designs/aws-vault/releases/download/{{aws_vault_latest_tag.stdout}}/aws-vault-linux-amd64"
         dest: /usr/local/bin/aws-vault
@@ -277,6 +276,8 @@
         - { repo: 'https://github.com/iamhsa/pkenv.git', dest: '/home/{{ ansible_user_id }}/.pkenv' }
         # Python version manager
         - { repo: 'https://github.com/pyenv/pyenv.git', dest: '/home/{{ ansible_user_id }}/.pyenv' }
+        # GoLang version manager
+        - { repo: 'https://github.com/syndbg/goenv.git', dest: '/home/{{ ansible_user_id }}/.goenv' }
     # Set entries in current users bash config to use version managers
     - name: Ensure bash profile lines are set
       ansible.builtin.lineinfile:
@@ -299,6 +300,11 @@
         - { regexp: 'rbenv init', line: 'eval "$(rbenv init - bash)"' }
         # Terraform tfenv
         - { regexp: '\.tfenv', line: 'export PATH="$HOME/.tfenv/bin:$PATH"' }
+        # GoLang goenv
+        - { regexp: '\.goenv', line: 'export PATH="$HOME/.goenv/bin:$PATH"' }
+        - { regexp: 'goenv init', line: 'eval "$(goenv init -)"' }
+        - { regexp: '\$GOROOT\/bin', line: 'export PATH="$GOROOT/bin:$PATH"' }
+        - { regexp: '\$GOPATH\/bin', line: 'export PATH="$PATH:$GOPATH/bin"' }
     # Execute SDKman installation script
     - name: Install SDKMan
       ansible.builtin.shell: /home/{{ ansible_user_id }}/sdkman-install.sh
