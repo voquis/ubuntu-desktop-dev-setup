@@ -219,6 +219,7 @@
       ansible.builtin.shell: "curl https://api.github.com/repos/99designs/aws-vault/tags | jq -r '.[0].name'"
       register: aws_vault_latest_tag
     - name: Download latest AWS vault
+      become: true
       ansible.builtin.get_url:
         url: "https://github.com/99designs/aws-vault/releases/download/{{aws_vault_latest_tag.stdout}}/aws-vault-linux-amd64"
         dest: /usr/local/bin/aws-vault
