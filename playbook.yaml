@@ -88,21 +88,28 @@
       become: true
       get_url:
         url: "{{ item.url }}"
-        dest: "{{ item.file }}"
+        dest: "/usr/share/keyrings/{{ item.file }}"
       loop:
         # The following keys do not need gpg dearmor
-        - { file: '/usr/share/keyrings/github-cli.gpg', url: 'https://cli.github.com/packages/githubcli-archive-keyring.gpg' }
-        - { file: '/usr/share/keyrings/brave-browser.gpg', url: 'https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg' }
-        - { file: '/usr/share/keyrings/google.gpg', url: 'https://packages.cloud.google.com/apt/doc/apt-key.gpg' }
-    # Extract keys for plain text pubic keys with dearmor
-    - name: Extract gpg keys with dearmor
+        - { file: 'github-cli.gpg', url: 'https://cli.github.com/packages/githubcli-archive-keyring.gpg' }
+        - { file: 'brave-browser.gpg', url: 'https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg' }
+        - { file: 'google.gpg', url: 'https://packages.cloud.google.com/apt/doc/apt-key.gpg' }
+        # The following keys will need gpg dearmor (see next task), gpg dearmor will add gpg extension
+        - { file: 'packages.microsoft', url: 'https://packages.microsoft.com/keys/microsoft.asc' }
+        - { file: 'docker-linux-ubuntu', url: 'https://download.docker.com/linux/ubuntu/gpg' }
+        - { file: 'signal-desktop', url: 'https://updates.signal.org/desktop/apt/keys.asc' }
+        - { file: 'pgadmin', url: 'https://www.pgadmin.org/static/packages_pgadmin_org.pub' }
+    # Extract keys for plain text pubic keys with dearmor, dearmor adds gpg file extension
+    - name: Extract and replace gpg keys with dearmor
       become: true
-      shell: "wget -O- {{ item.url }} | gpg --dearmor > /usr/share/keyrings/{{ item.file }}"
+      shell:
+        cmd: "gpg --dearmor /usr/share/keyrings/{{ item.file }}"
+        creates: "/usr/share/keyrings/{{ item.file }}.gpg"
       loop:
-        - { file: 'packages.microsoft.gpg', url: 'https://packages.microsoft.com/keys/microsoft.asc' }
-        - { file: 'docker-linux-ubuntu.gpg', url: 'https://download.docker.com/linux/ubuntu/gpg' }
-        - { file: 'signal-desktop.gpg', url: 'https://updates.signal.org/desktop/apt/keys.asc' }
-        - { file: 'pgadmin.gpg', url: 'https://www.pgadmin.org/static/packages_pgadmin_org.pub' }
+        - { file: 'packages.microsoft'}
+        - { file: 'docker-linux-ubuntu'}
+        - { file: 'signal-desktop'}
+        - { file: 'pgadmin'}
     - name: Add apt repositories
       become: true
       apt_repository:
@@ -215,13 +222,17 @@
         creates: /usr/local/bin/aws
       become: true
     # Get the latest release tag of aws-vault
-    - name: Fetch latest aws-vault release tag and make available as a variable to following tasks
-      ansible.builtin.shell: "curl https://api.github.com/repos/99designs/aws-vault/tags | jq -r '.[0].name'"
-      register: aws_vault_latest_tag
+    - name: Fetch all aws-vault release tag and make available as a variable to following tasks
+      ansible.builtin.uri:
+        url: https://api.github.com/repos/99designs/aws-vault/tags
+        return_content: yes
+      register: aws_vault_tags
+    # - name: Extract latest aws-vault tag and make available to following tasks
+    #   register: aws_vault_latest_tag
     - name: Download latest AWS vault
       become: true
       ansible.builtin.get_url:
-        url: "https://github.com/99designs/aws-vault/releases/download/{{aws_vault_latest_tag.stdout}}/aws-vault-linux-amd64"
+        url: "https://github.com/99designs/aws-vault/releases/download/{{ aws_vault_tags.json[0].name }}/aws-vault-linux-amd64"
         dest: /usr/local/bin/aws-vault
         mode: 0755
     # Set up users in groups
