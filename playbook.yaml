@@ -133,8 +133,8 @@
         - https://packages.microsoft.com/config/ubuntu/{{ ansible_distribution_version }}/packages-microsoft-prod.deb
         # Microsoft VSCode
         - https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64
-        # # Keybase
-        # - https://prerelease.keybase.io/keybase_amd64.deb
+        # Keybase
+        - https://prerelease.keybase.io/keybase_amd64.deb
         # MySQL
         - https://dev.mysql.com/get/mysql-apt-config_0.8.23-1_all.deb
     # Update apt after installing repositories
