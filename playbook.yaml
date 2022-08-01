@@ -38,7 +38,6 @@
         - libreoffice
         - libvirt-daemon
         - libvirt-clients
-        - obs-studio
         - pass
         - remmina
         - qemu
@@ -192,6 +191,7 @@
           - postman
           - discord
           - teams
+          - obs-studio
     # Set up user groups
     - name: Manage groups
       become: true
