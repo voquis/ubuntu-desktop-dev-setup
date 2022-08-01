@@ -71,6 +71,7 @@ The following security tools are installed:
 - Gimp - graphical image manipulation
 - Inkscape - vector drawing utilities
 - Xournal - PDF management
+- OBS Studio - Screen recording
 
 ## Installation
 First Download the `deploy.sh` script locally:

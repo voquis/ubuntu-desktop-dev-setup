@@ -38,6 +38,7 @@
         - libreoffice
         - libvirt-daemon
         - libvirt-clients
+        - obs-studio
         - pass
         - remmina
         - qemu
