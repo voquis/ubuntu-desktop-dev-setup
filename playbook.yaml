@@ -39,9 +39,10 @@
         - libvirt-daemon
         - libvirt-clients
         - pass
-        - remmina
         - qemu
         - qemu-kvm
+        - remmina
+        - shellcheck
         - vim
         - virt-manager
         - xournal
