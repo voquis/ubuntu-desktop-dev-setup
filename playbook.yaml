@@ -103,6 +103,7 @@
         - { file: 'signal-desktop', url: 'https://updates.signal.org/desktop/apt/keys.asc' }
         - { file: 'pgadmin', url: 'https://www.pgadmin.org/static/packages_pgadmin_org.pub' }
         - { file: 'slack', url: 'https://packagecloud.io/slacktechnologies/slack/gpgkey'}
+        - { file: 'glab', url: 'https://proget.makedeb.org/debian-feeds/prebuilt-mpr.pub' }
     # Extract keys for plain text pubic keys with dearmor, dearmor adds gpg file extension
     - name: Extract and replace gpg keys with dearmor
       become: true
@@ -115,6 +116,7 @@
         - { file: 'signal-desktop'}
         - { file: 'pgadmin'}
         - { file: 'slack'}
+        - { file: 'glab'}
     - name: Add apt repositories
       become: true
       apt_repository:
@@ -128,6 +130,7 @@
         - "deb [arch=amd64 signed-by=/usr/share/keyrings/signal-desktop.gpg] https://updates.signal.org/desktop/apt xenial main"
         - "deb [arch=amd64 signed-by=/usr/share/keyrings/pgadmin.gpg] https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/{{ ansible_distribution_release }} pgadmin4 main"
         - "deb [arch=amd64 signed-by=/usr/share/keyrings/slack.gpg] https://packagecloud.io/slacktechnologies/slack/debian jessie main"
+        - "deb [arch=amd64 signed-by=/usr/share/keyrings/glab.gpg] https://proget.makedeb.org prebuilt-mpr {{ ansible_distribution_release }}"
         - "ppa:obsproject/obs-studio"
     - name: Install remote packages
       become: true
@@ -169,6 +172,8 @@
         # Google
         - google-cloud-sdk
         - kubectl
+        # GitLab CLI
+        - glab
         # Signal messaging
         - signal-desktop
         # Microsoft
