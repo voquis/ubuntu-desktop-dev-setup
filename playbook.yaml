@@ -39,6 +39,7 @@
         - libvirt-daemon
         - libvirt-clients
         - pass
+        - plantuml
         - qemu
         - qemu-kvm
         - remmina
