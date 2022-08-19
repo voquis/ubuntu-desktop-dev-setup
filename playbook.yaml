@@ -102,6 +102,7 @@
         - { file: 'docker-linux-ubuntu', url: 'https://download.docker.com/linux/ubuntu/gpg' }
         - { file: 'signal-desktop', url: 'https://updates.signal.org/desktop/apt/keys.asc' }
         - { file: 'pgadmin', url: 'https://www.pgadmin.org/static/packages_pgadmin_org.pub' }
+        - { file: 'slack', url: 'https://packagecloud.io/slacktechnologies/slack/gpgkey'}
     # Extract keys for plain text pubic keys with dearmor, dearmor adds gpg file extension
     - name: Extract and replace gpg keys with dearmor
       become: true
@@ -113,6 +114,7 @@
         - { file: 'docker-linux-ubuntu'}
         - { file: 'signal-desktop'}
         - { file: 'pgadmin'}
+        - { file: 'slack'}
     - name: Add apt repositories
       become: true
       apt_repository:
@@ -125,6 +127,7 @@
         - "deb [arch=amd64 signed-by=/usr/share/keyrings/google.gpg] https://packages.cloud.google.com/apt cloud-sdk main"
         - "deb [arch=amd64 signed-by=/usr/share/keyrings/signal-desktop.gpg] https://updates.signal.org/desktop/apt xenial main"
         - "deb [arch=amd64 signed-by=/usr/share/keyrings/pgadmin.gpg] https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/{{ ansible_distribution_release }} pgadmin4 main"
+        - "deb [arch=amd64 signed-by=/usr/share/keyrings/slack.gpg] https://packagecloud.io/slacktechnologies/slack/debian jessie main"
         - "ppa:obsproject/obs-studio"
     - name: Install remote packages
       become: true
@@ -178,6 +181,8 @@
         - pgadmin4-desktop
         # OBS Studio
         - obs-studio
+        # Slack
+        - slack-desktop
     # Start and enable system services on boot
     - name: Enable services
       become: true
@@ -193,7 +198,6 @@
       become: true
       snap:
         name:
-          - slack
           - postman
           - discord
           - teams
