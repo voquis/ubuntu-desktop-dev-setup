@@ -47,6 +47,8 @@
         - virt-manager
         - xournal
         - zsh
+        # OBS Studio dependencies
+        - ffmpeg
         # Python, PHP, Ruby version manager build dependencies
         - autoconf
         - bison
@@ -123,6 +125,7 @@
         - "deb [arch=amd64 signed-by=/usr/share/keyrings/google.gpg] https://packages.cloud.google.com/apt cloud-sdk main"
         - "deb [arch=amd64 signed-by=/usr/share/keyrings/signal-desktop.gpg] https://updates.signal.org/desktop/apt xenial main"
         - "deb [arch=amd64 signed-by=/usr/share/keyrings/pgadmin.gpg] https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/{{ ansible_distribution_release }} pgadmin4 main"
+        - "ppa:obsproject/obs-studio"
     - name: Install remote packages
       become: true
       apt:
@@ -173,6 +176,8 @@
         - mysql-workbench-community
         # Postgres
         - pgadmin4-desktop
+        # OBS Studio
+        - obs-studio
     # Start and enable system services on boot
     - name: Enable services
       become: true
@@ -192,7 +197,6 @@
           - postman
           - discord
           - teams
-          - obs-studio
     # Set up user groups
     - name: Manage groups
       become: true
