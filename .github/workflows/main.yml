@@ -1,6 +1,6 @@
 name: CI
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
@@ -11,20 +11,21 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  validate:
     runs-on: ubuntu-latest
-    # Docker Hub image that `container-job` executes in
-    container: "koalaman/shellcheck-alpine"
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      # Checkout project code
       - uses: actions/checkout@v2
 
-      # Runs a single command using the runners shell
-      - name: Shellcheck
-        run: shellcheck deploy.sh
+      # Install and run shellcheck for all shell scripts
+      - run: sudo apt install shellcheck
+      - run: for f in $(find scripts -type f -name *.sh); do shellcheck $f; done;
+
+      # Use python setup action to configure version
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      # Run validation script
+      - run: ./scripts/validate.sh

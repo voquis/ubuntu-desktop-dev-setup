@@ -1,343 +1,391 @@
 ---
-  - name: "Deploy Ubuntu development machine"
-    hosts: localhost
-    connection: local
-    tasks:
-    # Get all users and make available as variable for other tasks
-    - name: Get all non-root human users
-      become: true
-      ansible.builtin.shell: "getent passwd $(ls /home) | awk -F: '{print $1}'"
-      register: all_human_users
-    # apt update and upgrade
-    - name: Update system
-      become: true
-      apt:
-        upgrade: 'yes'
-        update_cache: yes
-    # Install applications and pre-requisite for other applications
-    - name: Install apt dependencies
-      become: true
-      apt:
-        name: "{{item}}"
-        state: present
-      loop:
-        - android-sdk
-        - apt-transport-https
-        - bridge-utils
-        - ca-certificates
-        - clamav
-        - clamtk
-        - cpu-checker
-        - curl
-        - git
-        - gimp
-        - gnupg
-        - gufw
-        - inkscape
-        - jq
-        - libreoffice
-        - libvirt-daemon
-        - libvirt-clients
-        - pass
-        - plantuml
-        - qemu
-        - qemu-kvm
-        - remmina
-        - shellcheck
-        - vim
-        - virt-manager
-        - xournal
-        - zsh
-        # OBS Studio dependencies
-        - ffmpeg
-        # Python, PHP, Ruby version manager build dependencies
-        - autoconf
-        - bison
-        - build-essential
-        - libbz2-dev
-        - libcurl4-openssl-dev
-        - libdb-dev
-        - libffi-dev
-        - libgdbm-dev
-        - libgdbm6
-        - libjpeg-dev
-        - liblzma-dev
-        - libncurses5-dev
-        - libncursesw5-dev
-        - libonig-dev
-        - libreadline-dev
-        - libreadline6-dev
-        - libsqlite3-dev
-        - libssl-dev
-        - libtidy-dev
-        - libxml2-dev
-        - libxmlsec1-dev
-        - libyaml-dev
-        - libzip-dev
-        - llvm
-        - make
-        - tk-dev
-        - xz-utils
-        - zlib1g-dev
-    # Create directories
-    - name: Manage directories
-      become: true
-      file:
-        path: "{{ item }}"
-        state: directory
-      loop:
-        - /usr/share/keyrings
-    # Fetch gpg keys for trusted apt repositories
-    - name: Download apt repository gpg keys
-      become: true
-      get_url:
-        url: "{{ item.url }}"
-        dest: "/usr/share/keyrings/{{ item.file }}"
-      loop:
-        # The following keys do not need gpg dearmor
-        - { file: 'github-cli.gpg', url: 'https://cli.github.com/packages/githubcli-archive-keyring.gpg' }
-        - { file: 'brave-browser.gpg', url: 'https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg' }
-        - { file: 'google.gpg', url: 'https://packages.cloud.google.com/apt/doc/apt-key.gpg' }
-        # The following keys will need gpg dearmor (see next task), gpg dearmor will add gpg extension
-        - { file: 'packages.microsoft', url: 'https://packages.microsoft.com/keys/microsoft.asc' }
-        - { file: 'docker-linux-ubuntu', url: 'https://download.docker.com/linux/ubuntu/gpg' }
-        - { file: 'signal-desktop', url: 'https://updates.signal.org/desktop/apt/keys.asc' }
-        - { file: 'pgadmin', url: 'https://www.pgadmin.org/static/packages_pgadmin_org.pub' }
-        - { file: 'slack', url: 'https://packagecloud.io/slacktechnologies/slack/gpgkey'}
-        - { file: 'glab', url: 'https://proget.makedeb.org/debian-feeds/prebuilt-mpr.pub' }
-    # Extract keys for plain text pubic keys with dearmor, dearmor adds gpg file extension
-    - name: Extract and replace gpg keys with dearmor
-      become: true
-      shell:
-        cmd: "gpg --dearmor /usr/share/keyrings/{{ item.file }}"
-        creates: "/usr/share/keyrings/{{ item.file }}.gpg"
-      loop:
-        - { file: 'packages.microsoft'}
-        - { file: 'docker-linux-ubuntu'}
-        - { file: 'signal-desktop'}
-        - { file: 'pgadmin'}
-        - { file: 'slack'}
-        - { file: 'glab'}
-    - name: Add apt repositories
-      become: true
-      apt_repository:
-        repo: "{{ item }}"
-      loop:
-        - "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-linux-ubuntu.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
-        - "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/azure-cli/ {{ ansible_distribution_release }} main"
-        - "deb [arch=amd64 signed-by=/usr/share/keyrings/github-cli.gpg] https://cli.github.com/packages stable main"
-        - "deb [arch=amd64 signed-by=/usr/share/keyrings/brave-browser.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main"
-        - "deb [arch=amd64 signed-by=/usr/share/keyrings/google.gpg] https://packages.cloud.google.com/apt cloud-sdk main"
-        - "deb [arch=amd64 signed-by=/usr/share/keyrings/signal-desktop.gpg] https://updates.signal.org/desktop/apt xenial main"
-        - "deb [arch=amd64 signed-by=/usr/share/keyrings/pgadmin.gpg] https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/{{ ansible_distribution_release }} pgadmin4 main"
-        - "deb [arch=amd64 signed-by=/usr/share/keyrings/slack.gpg] https://packagecloud.io/slacktechnologies/slack/debian jessie main"
-        - "deb [arch=amd64 signed-by=/usr/share/keyrings/glab.gpg] https://proget.makedeb.org prebuilt-mpr {{ ansible_distribution_release }}"
-        - "ppa:obsproject/obs-studio"
-    - name: Install remote packages
-      become: true
-      apt:
-        deb: "{{ item }}"
-      loop:
-        # Google Chrome
-        - https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-        # Microsoft Powershell
-        - https://packages.microsoft.com/config/ubuntu/{{ ansible_distribution_version }}/packages-microsoft-prod.deb
-        # Microsoft VSCode
-        - https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64
-        # Keybase
-        - https://prerelease.keybase.io/keybase_amd64.deb
-        # MySQL
-        - https://dev.mysql.com/get/mysql-apt-config_0.8.23-1_all.deb
-    # Update apt after installing repositories
-    - name: Update system
-      become: true
-      apt:
-        upgrade: 'yes'
-        update_cache: yes
-    # Install applications
-    - name: Install applications
-      become: true
-      apt:
-        name: "{{ item }}"
-        state: latest
-      loop:
-        # GitHub CLI
-        - gh
-        # Docker
-        - docker-ce
-        - docker-ce-cli
-        - docker-compose-plugin
-        - containerd.io
-        # Brave browser
-        - brave-browser
-        # Google
-        - google-cloud-sdk
-        - kubectl
-        # GitLab CLI
-        - glab
-        # Signal messaging
-        - signal-desktop
-        # Microsoft
-        - azure-cli
-        - code
-        - powershell
-        # MySQL
-        - mysql-workbench-community
-        # Postgres
-        - pgadmin4-desktop
-        # OBS Studio
-        - obs-studio
-        # Slack
-        - slack-desktop
-    # Start and enable system services on boot
-    - name: Enable services
-      become: true
-      systemd:
-        name: "{{ item }}"
-        state: started
-        enabled: yes
-      loop:
-        - docker
-        - libvirtd
-    # Install Snap apps
-    - name: Install Snap apps
-      become: true
-      community.general.snap:
-        name:
-          - postman
-          - discord
-          - teams
-    # Set up user groups
-    - name: Manage groups
-      become: true
-      ansible.builtin.group:
-        name: docker
-        state: present
-    # Ensure user belongs to expected groups
-    - name: Add user to groups
-      become: true
-      ansible.builtin.user:
-        name: "{{ item }}"
-        groups: docker
-        append: yes
-      loop: "{{ all_human_users.stdout_lines }}"
-    # Extract AWS CLI archive, adapted from:
-    # https://github.com/deekayen/ansible-role-awscli2
-    - name: Extract AWS CLI archive
-      ansible.builtin.unarchive:
-        src: https://awscli.amazonaws.com/awscli-exe-linux-{{ ansible_architecture }}.zip
-        dest: /tmp
-        remote_src: true
-        creates: /tmp/aws
-        mode: 0755
-    # Install AWS CLI
-    - name: Install AWS CLI
-      command:
-      args:
-        cmd: /tmp/aws/install
-        creates: /usr/local/bin/aws
-      become: true
-    # Get the latest release tag of aws-vault
-    - name: Fetch all aws-vault release tag and make available as a variable to following tasks
-      ansible.builtin.uri:
-        url: https://api.github.com/repos/99designs/aws-vault/tags
-        return_content: yes
-      register: aws_vault_tags
-    # Fetch the latest release tag of aws-vault
-    - name: Download latest AWS vault
-      become: true
-      ansible.builtin.get_url:
-        url: "https://github.com/99designs/aws-vault/releases/download/{{ aws_vault_tags.json[0].name }}/aws-vault-linux-amd64"
-        dest: /usr/local/bin/aws-vault
-        mode: 0755
-    # Fetch the latest PHP Composer
-    - name: Download latest Composer for PHP
-      become: true
-      ansible.builtin.get_url:
-        url: "https://getcomposer.org/download/latest-stable/composer.phar"
-        dest: /usr/local/bin/composer
-        mode: 0755
-    # Set up users in groups
-    - name: Ensure current user belongs to groups
-      become: true
-      user:
-        name: "{{ ansible_env.USER }}"
-        group: docker
-    # Configure uncomplicated firewall (UFW)
-    - name: Enable UFW
-      become: true
-      ufw:
-        state: enabled
-    # apt clean and autoremove
-    - name: Update system
-      become: true
-      apt:
-        autoclean: yes
-        autoremove: yes
-    # Download script to be installed later (non-root)
-    - name: Download User installable scripts (non-root)
-      ansible.builtin.get_url:
-        url: "{{ item.url }}"
-        dest: "/home/{{ ansible_user_id }}/{{ item.dest }}"
-        mode: 0744
-      loop:
-        - {url: 'https://get.sdkman.io', dest: 'sdkman-install.sh'}
-        - {url: 'https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh', dest: 'ohmybash-install.sh'}
-    # Execute Ohmybash installation script
-    # Run this before other scripts as it replaces .bashrc file
-    - name: Install OhMyBash
-      ansible.builtin.shell:
-        cmd: "/home/{{ ansible_user_id }}/ohmybash-install.sh"
-        creates: "/home/{{ ansible_user_id }}/.oh-my-bash"
-    # Clone remote repos for user
-    - name: Clone git repos
-      ansible.builtin.git:
-        repo: "{{ item.repo }}"
-        dest: "{{ item.dest }}"
-      loop:
-        # Terraform version manager
-        - { repo: 'https://github.com/tfutils/tfenv.git', dest: '/home/{{ ansible_user_id }}/.tfenv' }
-        # Ruby version manager and builder
-        - { repo: 'https://github.com/rbenv/rbenv.git', dest: '/home/{{ ansible_user_id }}/.rbenv' }
-        - { repo: 'https://github.com/rbenv/ruby-build.git', dest: '/home/{{ ansible_user_id }}/.rbenv/plugins/ruby-build' }
-        # PHP version manager
-        - { repo: 'https://github.com/phpenv/phpenv.git', dest: '/home/{{ ansible_user_id }}/.phpenv' }
-        - { repo: 'https://github.com/php-build/php-build', dest: '/home/{{ ansible_user_id }}/.phpenv/plugins/php-build' }
-        # Node JS version manager
-        - { repo: 'https://github.com/nvm-sh/nvm.git', dest: '/home/{{ ansible_user_id }}/.nvm' }
-        # Packer version manager
-        - { repo: 'https://github.com/iamhsa/pkenv.git', dest: '/home/{{ ansible_user_id }}/.pkenv' }
-        # Python version manager
-        - { repo: 'https://github.com/pyenv/pyenv.git', dest: '/home/{{ ansible_user_id }}/.pyenv' }
-        # GoLang version manager
-        - { repo: 'https://github.com/syndbg/goenv.git', dest: '/home/{{ ansible_user_id }}/.goenv' }
-    # Set entries in current users bash config to use version managers
-    - name: Ensure bash profile lines are set
-      ansible.builtin.lineinfile:
-        path: /home/{{ ansible_user_id }}/.bashrc
-        regexp: "{{ item.regexp }}"
-        line: "{{ item.line }}"
-      loop:
-        # NodeJS
-        - { regexp: 'nvm\.sh', line: '. $HOME/.nvm/nvm.sh' }
-        # Packer
-        - { regexp: '\.pkenv', line: 'export PATH="$HOME/.pkenv/bin:$PATH"' }
-        # PHP
-        - { regexp: '\.phpenv', line: 'export PATH="$HOME/.phpenv/bin:$PATH"' }
-        - { regexp: 'phpenv init', line: 'eval "$(phpenv init -)"' }
-        # Python
-        - { regexp: '\.pyenv', line: 'export PATH="$HOME/.pyenv/bin:$PATH"' }
-        - { regexp: 'pyenv init', line: 'eval "$(pyenv init -)"' }
-        # Ruby
-        - { regexp: '\.rbenv', line: 'export PATH="$HOME/.rbenv/bin:$PATH"' }
-        - { regexp: 'rbenv init', line: 'eval "$(rbenv init - bash)"' }
-        # Terraform tfenv
-        - { regexp: '\.tfenv', line: 'export PATH="$HOME/.tfenv/bin:$PATH"' }
-        # GoLang goenv
-        - { regexp: '\.goenv', line: 'export PATH="$HOME/.goenv/bin:$PATH"' }
-        - { regexp: 'goenv init', line: 'eval "$(goenv init -)"' }
-        - { regexp: '\$GOROOT\/bin', line: 'export PATH="$GOROOT/bin:$PATH"' }
-        - { regexp: '\$GOPATH\/bin', line: 'export PATH="$PATH:$GOPATH/bin"' }
-    # Execute SDKman installation script
-    - name: Install SDKMan
-      ansible.builtin.shell: /home/{{ ansible_user_id }}/sdkman-install.sh
+- name: "Deploy Ubuntu development machine"
+  hosts: localhost
+  connection: local
+  tasks:
+  # Get all users and make available as variable for other tasks
+  - name: Get all non-root human users
+    become: true
+    ansible.builtin.shell: "set -euo pipefail && getent passwd $(ls /home) | awk -F: '{print $1}'"
+    register: all_human_users
+    args:
+      executable: /usr/bin/bash
+  # apt update and upgrade
+  - name: Update system
+    become: true
+    ansible.builtin.apt:
+      upgrade: 'yes'
+      update_cache: true
+  # Install applications and pre-requisite for other applications
+  - name: Install apt dependencies
+    become: true
+    ansible.builtin.apt:
+      name: "{{ item }}"
+      state: present
+    loop:
+      - android-sdk
+      - apt-transport-https
+      - bridge-utils
+      - ca-certificates
+      - clamav
+      - clamtk
+      - cpu-checker
+      - curl
+      - git
+      - gimp
+      - gnupg
+      - gufw
+      - inkscape
+      - jq
+      - libreoffice
+      - libvirt-daemon
+      - libvirt-clients
+      - pass
+      - plantuml
+      - qemu
+      - qemu-kvm
+      - remmina
+      - shellcheck
+      - vim
+      - virt-manager
+      - xournal
+      - zsh
+      # OBS Studio dependencies
+      - ffmpeg
+      # Python, PHP, Ruby version manager build dependencies
+      - autoconf
+      - bison
+      - build-essential
+      - libbz2-dev
+      - libcurl4-openssl-dev
+      - libdb-dev
+      - libffi-dev
+      - libgdbm-dev
+      - libgdbm6
+      - libjpeg-dev
+      - liblzma-dev
+      - libncurses5-dev
+      - libncursesw5-dev
+      - libonig-dev
+      - libreadline-dev
+      - libreadline6-dev
+      - libsqlite3-dev
+      - libssl-dev
+      - libtidy-dev
+      - libxml2-dev
+      - libxmlsec1-dev
+      - libyaml-dev
+      - libzip-dev
+      - llvm
+      - make
+      - tk-dev
+      - xz-utils
+      - zlib1g-dev
+  # Create directories
+  - name: Manage directories
+    become: true
+    ansible.builtin.file:
+      path: "{{ item }}"
+      state: directory
+      mode: 0755
+    loop:
+      - /usr/share/keyrings
+  # Fetch gpg keys for trusted apt repositories
+  - name: Download apt repository gpg keys
+    become: true
+    ansible.builtin.get_url:
+      url: "{{ item.url }}"
+      dest: "/usr/share/keyrings/{{ item.file }}"
+      mode: 0644
+    loop:
+      # The following keys do not need gpg dearmor
+      - { file: 'github-cli.gpg', url: 'https://cli.github.com/packages/githubcli-archive-keyring.gpg' }
+      - { file: 'brave-browser.gpg', url: 'https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg' }
+      - { file: 'google.gpg', url: 'https://packages.cloud.google.com/apt/doc/apt-key.gpg' }
+      # The following keys will need gpg dearmor (see next task), gpg dearmor will add gpg extension
+      - { file: 'packages.microsoft', url: 'https://packages.microsoft.com/keys/microsoft.asc' }
+      - { file: 'docker-linux-ubuntu', url: 'https://download.docker.com/linux/ubuntu/gpg' }
+      - { file: 'signal-desktop', url: 'https://updates.signal.org/desktop/apt/keys.asc' }
+      - { file: 'pgadmin', url: 'https://www.pgadmin.org/static/packages_pgadmin_org.pub' }
+      - { file: 'slack', url: 'https://packagecloud.io/slacktechnologies/slack/gpgkey'}
+      - { file: 'glab', url: 'https://proget.makedeb.org/debian-feeds/prebuilt-mpr.pub' }
+  # Extract keys for plain text pubic keys with dearmor, dearmor adds gpg file extension
+  - name: Extract and replace gpg keys with dearmor
+    become: true
+    ansible.builtin.command:
+      cmd: "gpg --dearmor /usr/share/keyrings/{{ item.file }}"
+      creates: "/usr/share/keyrings/{{ item.file }}.gpg"
+    loop:
+      - { file: 'packages.microsoft'}
+      - { file: 'docker-linux-ubuntu'}
+      - { file: 'signal-desktop'}
+      - { file: 'pgadmin'}
+      - { file: 'slack'}
+      - { file: 'glab'}
+  - name: Add apt repositories
+    become: true
+    ansible.builtin.apt_repository:
+      repo: "{{ item }}"
+    loop:
+      - >
+        deb
+        [arch=amd64 signed-by=/usr/share/keyrings/docker-linux-ubuntu.gpg]
+        https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }}
+        stable
+      - >
+        deb
+        [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg]
+        https://packages.microsoft.com/repos/azure-cli/
+        {{ ansible_distribution_release }}
+        main
+      - >
+        deb
+        [arch=amd64 signed-by=/usr/share/keyrings/github-cli.gpg]
+        https://cli.github.com/packages
+        stable
+        main
+      - >
+        deb
+        [arch=amd64 signed-by=/usr/share/keyrings/brave-browser.gpg]
+        https://brave-browser-apt-release.s3.brave.com/
+        stable
+        main
+      - >
+        deb
+        [arch=amd64 signed-by=/usr/share/keyrings/google.gpg]
+        https://packages.cloud.google.com/apt
+        cloud-sdk
+        main
+      - >
+        deb
+        [arch=amd64 signed-by=/usr/share/keyrings/signal-desktop.gpg]
+        https://updates.signal.org/desktop/apt
+        xenial
+        main
+      - >
+        deb
+        [arch=amd64 signed-by=/usr/share/keyrings/pgadmin.gpg]
+        https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/{{ ansible_distribution_release }}
+        pgadmin4
+        main
+      - >
+        deb
+        [arch=amd64 signed-by=/usr/share/keyrings/slack.gpg]
+        https://packagecloud.io/slacktechnologies/slack/debian
+        jessie
+        main
+      - >
+        deb
+        [arch=amd64 signed-by=/usr/share/keyrings/glab.gpg]
+        https://proget.makedeb.org prebuilt-mpr
+        {{ ansible_distribution_release }}
+      - "ppa:obsproject/obs-studio"
+  - name: Install remote packages
+    become: true
+    ansible.builtin.apt:
+      deb: "{{ item }}"
+    loop:
+      # Google Chrome
+      - https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+      # Microsoft Powershell
+      - https://packages.microsoft.com/config/ubuntu/{{ ansible_distribution_version }}/packages-microsoft-prod.deb
+      # Microsoft VSCode
+      - https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64
+      # Keybase
+      - https://prerelease.keybase.io/keybase_amd64.deb
+      # MySQL
+      - https://dev.mysql.com/get/mysql-apt-config_0.8.23-1_all.deb
+  # Update apt after installing repositories
+  - name: Update system
+    become: true
+    ansible.builtin.apt:
+      upgrade: 'yes'
+      update_cache: true
+  # Install applications
+  - name: Install applications
+    become: true
+    ansible.builtin.apt:
+      name: "{{ item }}"
+      state: present
+    loop:
+      # GitHub CLI
+      - gh
+      # Docker
+      - docker-ce
+      - docker-ce-cli
+      - docker-compose-plugin
+      - containerd.io
+      # Brave browser
+      - brave-browser
+      # Google
+      - google-cloud-sdk
+      - kubectl
+      # GitLab CLI
+      - glab
+      # Signal messaging
+      - signal-desktop
+      # Microsoft
+      - azure-cli
+      - code
+      - powershell
+      # MySQL
+      - mysql-workbench-community
+      # Postgres
+      - pgadmin4-desktop
+      # OBS Studio
+      - obs-studio
+      # Slack
+      - slack-desktop
+  # Start and enable system services on boot
+  - name: Enable services
+    become: true
+    ansible.builtin.systemd:
+      name: "{{ item }}"
+      state: started
+      enabled: true
+    loop:
+      - docker
+      - libvirtd
+  # Install Snap apps
+  - name: Install Snap apps
+    become: true
+    community.general.snap:
+      name:
+        - postman
+        - discord
+        - teams
+  # Set up user groups
+  - name: Manage groups
+    become: true
+    ansible.builtin.group:
+      name: docker
+      state: present
+  # Ensure user belongs to expected groups
+  - name: Add user to groups
+    become: true
+    ansible.builtin.user:
+      name: "{{ item }}"
+      groups: docker
+      append: true
+    loop: "{{ all_human_users.stdout_lines }}"
+  # Extract AWS CLI archive, adapted from:
+  # https://github.com/deekayen/ansible-role-awscli2
+  - name: Extract AWS CLI archive
+    ansible.builtin.unarchive:
+      src: https://awscli.amazonaws.com/awscli-exe-linux-{{ ansible_architecture }}.zip
+      dest: /tmp
+      remote_src: true
+      creates: /tmp/aws
+      mode: 0755
+  # Install AWS CLI
+  - name: Install AWS CLI
+    ansible.builtin.command:
+    args:
+      cmd: /tmp/aws/install
+      creates: /usr/local/bin/aws
+    become: true
+  # Get the latest release tag of aws-vault
+  - name: Fetch all aws-vault release tag and make available as a variable to following tasks
+    ansible.builtin.uri:
+      url: https://api.github.com/repos/99designs/aws-vault/tags
+      return_content: true
+    register: aws_vault_tags
+  # Fetch the latest release tag of aws-vault
+  - name: Download latest AWS vault
+    become: true
+    ansible.builtin.get_url:
+      url: "https://github.com/99designs/aws-vault/releases/download/{{ aws_vault_tags.json[0].name }}/aws-vault-linux-amd64"
+      dest: /usr/local/bin/aws-vault
+      mode: 0755
+  # Fetch the latest PHP Composer
+  - name: Download latest Composer for PHP
+    become: true
+    ansible.builtin.get_url:
+      url: "https://getcomposer.org/download/latest-stable/composer.phar"
+      dest: /usr/local/bin/composer
+      mode: 0755
+  # Set up users in groups
+  - name: Ensure current user belongs to groups
+    become: true
+    ansible.builtin.user:
+      name: "{{ ansible_env.USER }}"
+      group: docker
+  # Configure uncomplicated firewall (UFW)
+  - name: Enable UFW
+    become: true
+    community.general.ufw:
+      state: enabled
+  # apt clean and autoremove
+  - name: Update system
+    become: true
+    ansible.builtin.apt:
+      autoclean: true
+      autoremove: true
+  # Download script to be installed later (non-root)
+  - name: Download User installable scripts (non-root)
+    ansible.builtin.get_url:
+      url: "{{ item.url }}"
+      dest: "/home/{{ ansible_user_id }}/{{ item.dest }}"
+      mode: 0744
+    loop:
+      - {url: 'https://get.sdkman.io', dest: 'sdkman-install.sh'}
+      - {url: 'https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh', dest: 'ohmybash-install.sh'}
+  # Execute Ohmybash installation script
+  # Run this before other scripts as it replaces .bashrc file
+  - name: Install OhMyBash
+    ansible.builtin.command:
+      cmd: "/home/{{ ansible_user_id }}/ohmybash-install.sh"
+      creates: "/home/{{ ansible_user_id }}/.oh-my-bash"
+  # Clone remote repos for user
+  - name: Clone git repos
+    ansible.builtin.git:
+      repo: "{{ item.repo }}"
+      dest: "{{ item.dest }}"
+      version: "{{ item.version }}"
+    loop:
+      # Terraform version manager
+      - { repo: 'https://github.com/tfutils/tfenv.git', dest: '/home/{{ ansible_user_id }}/.tfenv', version: 'master' }
+      # Ruby version manager and builder
+      - { repo: 'https://github.com/rbenv/rbenv.git', dest: '/home/{{ ansible_user_id }}/.rbenv', version: 'master' }
+      - { repo: 'https://github.com/rbenv/ruby-build.git', dest: '/home/{{ ansible_user_id }}/.rbenv/plugins/ruby-build', version: 'master' }
+      # PHP version manager
+      - { repo: 'https://github.com/phpenv/phpenv.git', dest: '/home/{{ ansible_user_id }}/.phpenv', version: 'master' }
+      - { repo: 'https://github.com/php-build/php-build', dest: '/home/{{ ansible_user_id }}/.phpenv/plugins/php-build', version: 'master' }
+      # Node JS version manager
+      - { repo: 'https://github.com/nvm-sh/nvm.git', dest: '/home/{{ ansible_user_id }}/.nvm', version: 'master' }
+      # Packer version manager
+      - { repo: 'https://github.com/iamhsa/pkenv.git', dest: '/home/{{ ansible_user_id }}/.pkenv', version: 'master' }
+      # Python version manager
+      - { repo: 'https://github.com/pyenv/pyenv.git', dest: '/home/{{ ansible_user_id }}/.pyenv', version: 'master' }
+      # GoLang version manager
+      - { repo: 'https://github.com/syndbg/goenv.git', dest: '/home/{{ ansible_user_id }}/.goenv', version: 'master' }
+  # Set entries in current users bash config to use version managers
+  - name: Ensure bash profile lines are set
+    ansible.builtin.lineinfile:
+      path: /home/{{ ansible_user_id }}/.bashrc
+      regexp: "{{ item.regexp }}"
+      line: "{{ item.line }}"
+    loop:
+      # NodeJS
+      - { regexp: 'nvm\.sh', line: '. $HOME/.nvm/nvm.sh' }
+      # Packer
+      - { regexp: '\.pkenv', line: 'export PATH="$HOME/.pkenv/bin:$PATH"' }
+      # PHP
+      - { regexp: '\.phpenv', line: 'export PATH="$HOME/.phpenv/bin:$PATH"' }
+      - { regexp: 'phpenv init', line: 'eval "$(phpenv init -)"' }
+      # Python
+      - { regexp: '\.pyenv', line: 'export PATH="$HOME/.pyenv/bin:$PATH"' }
+      - { regexp: 'pyenv init', line: 'eval "$(pyenv init -)"' }
+      # Ruby
+      - { regexp: '\.rbenv', line: 'export PATH="$HOME/.rbenv/bin:$PATH"' }
+      - { regexp: 'rbenv init', line: 'eval "$(rbenv init - bash)"' }
+      # Terraform tfenv
+      - { regexp: '\.tfenv', line: 'export PATH="$HOME/.tfenv/bin:$PATH"' }
+      # GoLang goenv
+      - { regexp: '\.goenv', line: 'export PATH="$HOME/.goenv/bin:$PATH"' }
+      - { regexp: 'goenv init', line: 'eval "$(goenv init -)"' }
+      - { regexp: '\$GOROOT\/bin', line: 'export PATH="$GOROOT/bin:$PATH"' }
+      - { regexp: '\$GOPATH\/bin', line: 'export PATH="$PATH:$GOPATH/bin"' }
+  # Execute SDKman installation script
+  - name: Install SDKMan
+    ansible.builtin.command: /home/{{ ansible_user_id }}/sdkman-install.sh

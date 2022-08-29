@@ -9,6 +9,9 @@ sudo apt update -y
 sudo apt upgrade -y
 sudo apt install -y ansible
 
+# Install additional ansible collections
+ansible-galaxy collection install community.general
+
 # Save ansible playbook from this repo to local path
 wget -O playbook.yaml https://raw.githubusercontent.com/voquis/ubuntu-desktop-dev-setup/main/playbook.yaml
 
