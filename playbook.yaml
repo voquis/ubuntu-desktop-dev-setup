@@ -202,7 +202,7 @@
     # Install Snap apps
     - name: Install Snap apps
       become: true
-      snap:
+      community.general.snap:
         name:
           - postman
           - discord
@@ -243,13 +243,19 @@
         url: https://api.github.com/repos/99designs/aws-vault/tags
         return_content: yes
       register: aws_vault_tags
-    # - name: Extract latest aws-vault tag and make available to following tasks
-    #   register: aws_vault_latest_tag
+    # Fetch the latest release tag of aws-vault
     - name: Download latest AWS vault
       become: true
       ansible.builtin.get_url:
         url: "https://github.com/99designs/aws-vault/releases/download/{{ aws_vault_tags.json[0].name }}/aws-vault-linux-amd64"
         dest: /usr/local/bin/aws-vault
+        mode: 0755
+    # Fetch the latest PHP Composer
+    - name: Download latest Composer for PHP
+      become: true
+      ansible.builtin.get_url:
+        url: "https://getcomposer.org/download/latest-stable/composer.phar"
+        dest: /usr/local/bin/composer
         mode: 0755
     # Set up users in groups
     - name: Ensure current user belongs to groups
