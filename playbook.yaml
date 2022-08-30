@@ -81,6 +81,22 @@
       - tk-dev
       - xz-utils
       - zlib1g-dev
+  # Extract AWS CLI archive, adapted from:
+  # https://github.com/deekayen/ansible-role-awscli2
+  - name: Extract AWS CLI archive
+    ansible.builtin.unarchive:
+      src: https://awscli.amazonaws.com/awscli-exe-linux-{{ ansible_architecture }}.zip
+      dest: /tmp
+      remote_src: true
+      creates: /tmp/aws
+      mode: 0755
+  # Install AWS CLI
+  - name: Install AWS CLI
+    ansible.builtin.command:
+    args:
+      cmd: /tmp/aws/install
+      creates: /usr/local/bin/aws
+    become: true
   # Create directories
   - name: Manage directories
     become: true
@@ -185,6 +201,8 @@
     ansible.builtin.apt:
       deb: "{{ item }}"
     loop:
+      # AWS Session Manager plugin
+      - https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb
       # Google Chrome
       - https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
       # Microsoft Powershell
@@ -268,22 +286,6 @@
       groups: docker
       append: true
     loop: "{{ all_human_users.stdout_lines }}"
-  # Extract AWS CLI archive, adapted from:
-  # https://github.com/deekayen/ansible-role-awscli2
-  - name: Extract AWS CLI archive
-    ansible.builtin.unarchive:
-      src: https://awscli.amazonaws.com/awscli-exe-linux-{{ ansible_architecture }}.zip
-      dest: /tmp
-      remote_src: true
-      creates: /tmp/aws
-      mode: 0755
-  # Install AWS CLI
-  - name: Install AWS CLI
-    ansible.builtin.command:
-    args:
-      cmd: /tmp/aws/install
-      creates: /usr/local/bin/aws
-    become: true
   # Get the latest release tag of aws-vault
   - name: Fetch all aws-vault release tag and make available as a variable to following tasks
     ansible.builtin.uri:
