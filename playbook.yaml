@@ -269,7 +269,6 @@
     become: true
     community.general.snap:
       name:
-        - postman
         - discord
         - teams
   # Set up user groups
@@ -306,6 +305,28 @@
       url: "https://getcomposer.org/download/latest-stable/composer.phar"
       dest: /usr/local/bin/composer
       mode: 0755
+  # Extract postman archive, adapted from:
+  # https://github.com/deekayen/ansible-role-awscli2
+  - name: Extract Postman archive
+    ansible.builtin.unarchive:
+      src: https://dl.pstmn.io/download/latest/linux64
+      dest: "/home/{{ ansible_user_id }}"
+      remote_src: true
+      creates: "/home/{{ ansible_user_id }}/Postman"
+      mode: 0755
+  # Set Postman launcher
+  - name: Create postman launcher
+    ansible.builtin.copy:
+      dest: "/home/{{ ansible_user_id }}/.local/share/applications/Postman.desktop"
+      content: |
+        [Desktop Entry]
+        Encoding=UTF-8
+        Name=Postman
+        Exec=/home/{{ ansible_user_id }}/Postman/app/Postman %U
+        Icon=/home/{{ ansible_user_id }}/Postman/app/resources/app/assets/icon.png
+        Terminal=false
+        Type=Application
+        Categories=Development;
   # Set up users in groups
   - name: Ensure current user belongs to groups
     become: true
@@ -388,6 +409,8 @@
       - { regexp: 'goenv init', line: 'eval "$(goenv init -)"' }
       - { regexp: '\$GOROOT\/bin', line: 'export PATH="$GOROOT/bin:$PATH"' }
       - { regexp: '\$GOPATH\/bin', line: 'export PATH="$PATH:$GOPATH/bin"' }
+      # Postman
+      - { regexp: 'Postman\/app', line: 'export PATH="$HOME/Postman/app:$PATH"' }
   # Execute SDKman installation script
   - name: Install SDKMan
     ansible.builtin.command: /home/{{ ansible_user_id }}/sdkman-install.sh
