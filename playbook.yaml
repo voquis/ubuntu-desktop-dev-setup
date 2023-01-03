@@ -212,7 +212,7 @@
       # Keybase
       - https://prerelease.keybase.io/keybase_amd64.deb
       # MySQL
-      - https://dev.mysql.com/get/mysql-apt-config_0.8.23-1_all.deb
+      - https://dev.mysql.com/get/mysql-apt-config_0.8.24-1_all.deb
   # Update apt after installing repositories
   - name: Update system
     become: true
@@ -382,6 +382,8 @@
       - { repo: 'https://github.com/pyenv/pyenv.git', dest: '/home/{{ ansible_user_id }}/.pyenv', version: 'master' }
       # GoLang version manager
       - { repo: 'https://github.com/syndbg/goenv.git', dest: '/home/{{ ansible_user_id }}/.goenv', version: 'master' }
+      # Swift version manager
+      - { repo: 'https://github.com/kylef/swiftenv.git', dest: '/home/{{ ansible_user_id }}/.swiftenv', version: 'master' }
   # Set entries in current users bash config to use version managers
   - name: Ensure bash profile lines are set
     ansible.builtin.lineinfile:
@@ -399,6 +401,10 @@
       # Python
       - { regexp: '\.pyenv', line: 'export PATH="$HOME/.pyenv/bin:$PATH"' }
       - { regexp: 'pyenv init', line: 'eval "$(pyenv init -)"' }
+      # Swift
+      - { regexp: '.swiftenv', line: 'export SWIFTENV_ROOT="$HOME/.swiftenv"' }
+      - { regexp: '\$SWIFTENV_ROOT', line: 'export PATH="$SWIFTENV_ROOT/bin:$PATH"' }
+      - { regexp: 'swiftenv init', line: 'eval "$(swiftenv init -)"' }
       # Ruby
       - { regexp: '\.rbenv', line: 'export PATH="$HOME/.rbenv/bin:$PATH"' }
       - { regexp: 'rbenv init', line: 'eval "$(rbenv init - bash)"' }
