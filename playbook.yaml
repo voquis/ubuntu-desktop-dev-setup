@@ -211,8 +211,6 @@
         - https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64
         # Keybase
         - https://prerelease.keybase.io/keybase_amd64.deb
-        # MySQL
-        - https://dev.mysql.com/get/mysql-apt-config_0.8.25-1_all.deb
     # Update apt after installing repositories
     - name: Update system
       become: true
@@ -246,8 +244,6 @@
         - azure-cli
         - code
         - powershell
-        # MySQL
-        - mysql-workbench-community
         # Postgres
         - pgadmin4-desktop
         # OBS Studio
