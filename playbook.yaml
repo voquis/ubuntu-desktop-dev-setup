@@ -211,6 +211,8 @@
         - https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64
         # Keybase
         - https://prerelease.keybase.io/keybase_amd64.deb
+        # Discord
+        - https://discord.com/api/download?platform=linux&amp;format=deb
     # Update apt after installing repositories
     - name: Update system
       become: true
@@ -260,13 +262,6 @@
       loop:
         - docker
         - libvirtd
-    # Install Snap apps
-    - name: Install Snap apps
-      become: true
-      community.general.snap:
-        name:
-          - discord
-          - teams
     # Set up user groups
     - name: Manage groups
       become: true
