@@ -212,7 +212,7 @@
       # Keybase
       - https://prerelease.keybase.io/keybase_amd64.deb
       # MySQL
-      - https://dev.mysql.com/get/mysql-apt-config_0.8.23-1_all.deb
+      - https://dev.mysql.com/get/mysql-apt-config_0.8.25-1_all.deb
   # Update apt after installing repositories
   - name: Update system
     become: true
